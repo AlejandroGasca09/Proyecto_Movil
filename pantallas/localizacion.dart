@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Localizacion extends StatefulWidget {
   const Localizacion({super.key, required this.title});
@@ -11,31 +12,43 @@ class Localizacion extends StatefulWidget {
 
 class _LocalizacionState extends State<Localizacion> {
 
-  TextEditingController _nombre = TextEditingController();
+  String _lat ="";
+  String _long ="";
 
-  Future<SharedPreferences> _obtenerPreferencias() async {
-    return SharedPreferences.getInstance();
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permissions are denied.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // Return the current position
+    return await Geolocator.getCurrentPosition();
   }
 
-  void guardaNombre(String nom) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("nombre", nom);
-  }
-  int _counter = 0;
-
-  void _incrementCounter() {
+  void _obtenerCoordenadas() async {
+    Position pos = await _determinePosition();
     setState(() {
-      _counter += 25;
+      _lat = pos.latitude.toString();
+      _long = pos.longitude.toString();
     });
   }
 
-  void _decrementCounter() {
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _counter -= 25;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,44 +60,52 @@ class _LocalizacionState extends State<Localizacion> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Ingresa tu nombre',
+          children: [
+            Text("Localizacion",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 30,
               ),
             ),
             SizedBox(
-              width: 400,
-              child: TextField(
-                controller: _nombre,
-                  textAlign: TextAlign.center,),
+              height: 35,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            MaterialButton(
+              onPressed: (){
+                _obtenerCoordenadas();
+              },
+              color: Theme.of(context).colorScheme.inversePrimary,
+              child: Text("Obtener coordenadas",
+                style: TextStyle(
+                  fontSize: 26
+                ),
+              ),
             ),
+            SizedBox(
+              height: 35,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text("Latitud : _$_lat",
+                  style: TextStyle(
+                    fontSize: 24,
+                  ),
+                )
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text("Longitud : _$_long",
+                  style: TextStyle(
+                    fontSize: 24,
+                  ),
+                )
+              ],
+            )
           ],
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.end, // Alinea los botones a la derecha
-        children: [
-          FloatingActionButton(
-            onPressed: _incrementCounter,
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(width: 20), // Espacio entre botones
-          FloatingActionButton(
-            onPressed: _decrementCounter,
-            tooltip: 'Decrement',
-            child: const Icon(Icons.remove),
-          ),
-        ],
-      ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

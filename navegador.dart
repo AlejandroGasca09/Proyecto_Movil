@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_movil/pantallas/bienv.dart';
+import 'package:proyecto_movil/pantallas/calendario.dart';
 import 'package:proyecto_movil/pantallas/pantalla2.dart';
 import 'package:proyecto_movil/pantallas/principal.dart';
 import 'package:proyecto_movil/pantallas/localizacion.dart';
@@ -17,22 +18,24 @@ class _NavegadorState extends State<Navegador>{
   List<Widget> _pantallas = [];
   int _p=0;
 
-  void _cambiaPantalla(int v){
-    setState(() {
-      _p = v;
-      _cuerpo = _pantallas[_p];
-    });
+  void _cambiaPantalla(int v) {
+      setState(() {
+        _p = v;
+        _cuerpo = _pantallas[_p];
+      });
   }
+
   @override
   void initState(){
     super.initState();
-    _pantallas.add(const MyHomePage(title: "Hola a todos!!!!"));
-    _pantallas.add(const Otra(title: "Adios a todos!!!!"));
-    _pantallas.add(const Calculadora(title: "Calcula"));
-    _pantallas.add(const Localizacion(title:"Localizacion"));
+    _pantallas.add(const MyHomePage(title: "Hola"));
+    _pantallas.add(const Otra(title: "Adios"));
+    _pantallas.add(const Calculadora(title: "Calculadora"));
+    _pantallas.add(const Localizacion(title: "Localizacion"));
     _pantallas.add(const Bienvenido(title: "Bienvenido"));
-    _cuerpo = _pantallas[_p];
+    _pantallas.add(const Calendario(title: "Calendario"));
   }
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -43,8 +46,11 @@ class _NavegadorState extends State<Navegador>{
           },
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(label:"Inicio",icon: Icon(Icons.arrow_back,)),
-            BottomNavigationBarItem(label:"Adelante",icon: Icon(Icons.arrow_forward,)),
+            BottomNavigationBarItem(label:"Inicio",icon: Icon(Icons.home,)),
+            BottomNavigationBarItem(label:"Imagen",icon: Icon(Icons.image,)),
+            BottomNavigationBarItem(label:"Calculadora",icon: Icon(Icons.calculate,)),
+            BottomNavigationBarItem(label:"Localizacion",icon: Icon(Icons.map,)),
+            BottomNavigationBarItem(label:"Bienvenido",icon: Icon(Icons.drive_file_rename_outline,)),
           ]),
     );
   }
