@@ -12,28 +12,27 @@ class Bienvenido extends StatefulWidget {
 class _BienvenidoState extends State<Bienvenido> {
 
   TextEditingController _nombre = TextEditingController();
+  String _nombreGuardado = "";
 
   Future<SharedPreferences> _obtenerPreferencias() async {
     return SharedPreferences.getInstance();
   }
 
-  void guardaNombre(String nom) async {
+  void _guardaNombre(String nom) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("nombre", nom);
-  }
-  int _counter = 0;
-
-  void _incrementCounter() {
     setState(() {
-      _counter += 25;
+      _nombreGuardado = nom; // Actualizamos el nombre guardado
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Nombre guardado: $nom")),
+    );
   }
 
-  void _decrementCounter() {
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _counter -= 25;
-      });
+  void _cargaNombre() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nombreGuardado = prefs.getString("nombre") ?? "No hay nombre guardado";
     });
   }
 
@@ -51,39 +50,41 @@ class _BienvenidoState extends State<Bienvenido> {
             const Text(
               'Ingresa tu nombre',
               style: TextStyle(
-                fontSize: 80,
+                fontSize: 24,
               ),
             ),
+            const SizedBox(height: 20),
             SizedBox(
-              width: 400,
+              width: 300,
               child: TextField(
-                  textAlign: TextAlign.center,),
+                controller: _nombre,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Escribe tu nombre",
+                ),
+              ),
             ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                if (_nombre.text.isNotEmpty) {
+                  _guardaNombre(_nombre.text);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Por favor, ingresa un nombre")),
+                  );
+                }
+              },
+              child: const Text("Guardar Nombre"),
+            ),
+            const SizedBox(height: 20),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              "Nombre guardado: $_nombreGuardado",
+              style: const TextStyle(fontSize: 18),
             ),
           ],
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.end, // Alinea los botones a la derecha
-        children: [
-          FloatingActionButton(
-            onPressed: _incrementCounter,
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
-          ),
-          const SizedBox(width: 10), // Espacio entre botones
-          FloatingActionButton(
-            onPressed: _decrementCounter,
-            tooltip: 'Decrement',
-            child: const Icon(Icons.remove),
-          ),
-        ],
-      ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
