@@ -5,6 +5,7 @@ import 'package:proyecto_movil/pantallas/pantalla2.dart';
 import 'package:proyecto_movil/pantallas/principal.dart';
 import 'package:proyecto_movil/pantallas/localizacion.dart';
 import 'pantallas/calc.dart';
+import 'pantallas/tarjetas.dart';
 
 class Navegador extends StatefulWidget{
   const Navegador({super.key});
@@ -34,6 +35,7 @@ class _NavegadorState extends State<Navegador>{
     _pantallas.add(const Localizacion(title: "Localizacion"));
     _pantallas.add(const Bienvenido(title: "Bienvenido"));
     _pantallas.add(const Calendario(title: "Calendario"));
+    // _pantallas.add(const Tarjetas(nombres: nombres, descripciones: descripciones, rutas: rutas));
   }
 
   @override
@@ -51,6 +53,7 @@ class _NavegadorState extends State<Navegador>{
             BottomNavigationBarItem(label:"Calculadora",icon: Icon(Icons.calculate,)),
             BottomNavigationBarItem(label:"Localizacion",icon: Icon(Icons.map,)),
             BottomNavigationBarItem(label:"Bienvenido",icon: Icon(Icons.drive_file_rename_outline,)),
+            BottomNavigationBarItem(label:"Tarjetas",icon: Icon(Icons.credit_card,)),
           ]),
     );
   }

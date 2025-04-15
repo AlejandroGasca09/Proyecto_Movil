@@ -9,11 +9,12 @@ class Calculadora extends StatefulWidget {
 }
 
 class _CalculadoraState extends State<Calculadora> {
-  double _total = 0;
-  double _total2 = 0;
+  double _valor1 = 0;
+  double _valor2 = 0;
   String _operador = "";
-  bool _punto = false;
-  int _contadorDecimal = 10;
+  String _texto = "0"; // Para mostrar el resultado y los números presionados
+  bool _punto = false; // Controla si se presionó el punto decimal
+  int _contadorDecimal = 10; // Para manejar los decimales
 
   final List<List<dynamic>> _simboloTeclado = [
     [7, 8, 9, '/'],
@@ -22,61 +23,76 @@ class _CalculadoraState extends State<Calculadora> {
     ['.', 0, '=', '+']
   ];
 
-  void _presionaNumero(dynamic n) {
+  void _presionaNumero(int n) {
     setState(() {
-      if (!_punto) {
-        _total = _total * 10 + (n as int);
+      if (_operador.isEmpty) {
+        // Estamos ingresando el primer número
+        if (!_punto) {
+          _valor1 = _valor1 * 10 + n;
+        } else {
+          _valor1 = _valor1 + n / _contadorDecimal;
+          _contadorDecimal *= 10;
+        }
+        _texto = _valor1.toStringAsFixed(2);
       } else {
-        _total = _total + ((n as int) / _contadorDecimal);
-        _contadorDecimal *= 10;
+        // Estamos ingresando el segundo número
+        if (!_punto) {
+          _valor2 = _valor2 * 10 + n;
+        } else {
+          _valor2 = _valor2 + n / _contadorDecimal;
+          _contadorDecimal *= 10;
+        }
+        _texto = _valor2.toStringAsFixed(2);
       }
     });
   }
 
   void _presionaSimbolo(String simbolo) {
     setState(() {
-      if (simbolo == '.') {
+      if (simbolo == ".") {
         if (!_punto) {
           _punto = true;
-          _contadorDecimal = 10;
+          _texto += ".";
         }
-      } else if (simbolo == '=') {
-        if (_operador.isNotEmpty) {
-          _realizaOperacion();
-          _operador = "";
-          _total2 = 0;
-        }
-        _punto = false;
+      } else if (simbolo == "=") {
+        _realizaOperacion();
       } else {
-        if (_operador.isNotEmpty) {
-          _realizaOperacion();
-        } else {
-          _total2 = _total;
-        }
-        _total = 0;
+        // Configurar el operador
         _operador = simbolo;
         _punto = false;
+        _contadorDecimal = 10; // Reiniciar el contador decimal
       }
     });
   }
 
   void _realizaOperacion() {
-    if (_operador == '+') {
-      _total = _total2 + _total;
-    } else if (_operador == '-') {
-      _total = _total2 - _total;
-    } else if (_operador == '*') {
-      _total = _total2 * _total;
-    } else if (_operador == '/') {
-      if (_total != 0) {
-        _total = _total2 / _total;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No se puede dividir por cero")),
-        );
-        _total = 0;
+    setState(() {
+      double resultado = 0;
+      if (_operador == "+") {
+        resultado = _valor1 + _valor2;
+      } else if (_operador == "-") {
+        resultado = _valor1 - _valor2;
+      } else if (_operador == "*") {
+        resultado = _valor1 * _valor2;
+      } else if (_operador == "/") {
+        if (_valor2 != 0) {
+          resultado = _valor1 / _valor2;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("No se puede dividir por cero")),
+          );
+          return;
+        }
       }
-    }
+
+      // Actualizar los valores y el texto
+      _valor1 = resultado;
+      _valor2 = 0;
+      _operador = "";
+      _punto = false;
+      _contadorDecimal = 10;
+      _texto = resultado.toStringAsFixed(2);
+    });
   }
 
   Widget _cargaTeclado(BuildContext context) {
@@ -130,9 +146,18 @@ class _CalculadoraState extends State<Calculadora> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            '${_total.toStringAsFixed(2)}',
-            style: Theme.of(context).textTheme.headlineMedium,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              readOnly: true, // Hacerlo de solo lectura
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Resultado',
+              ),
+              controller: TextEditingController(text: _texto), // Mostrar el texto
+              style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.right,
+            ),
           ),
           const SizedBox(height: 20),
           _cargaTeclado(context),
